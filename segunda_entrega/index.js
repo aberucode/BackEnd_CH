@@ -44,7 +44,8 @@ class ProductManager {
     if(fs.existsSync(archivo)){
       const content = await fs.promises.readFile(archivo, 'utf-8');
       this.products = await JSON.parse(content);
-      this.id = this.products.length;
+      const aux = this.products.at(-1);
+      this.id = aux[0] + 1;
     }
   }
 
@@ -84,8 +85,12 @@ class ProductManager {
     }
   }
 
-  deleteProduct(){
-    console.log("hoal");
+  async deleteProduct(id){
+    let aux = this.products; 
+    this.products = aux.filter(data => data[0] != id);
+    this.id--;
+    await fs.promises.writeFile(archivo, JSON.stringify(this.products, null, '\t'))
+    console.log("Product deleted successfully");
   }
 }
 
@@ -125,16 +130,17 @@ const mainAsync = async () => {
         "* 2. Add product                            *\n",
         "* 3. View product by ID                     *\n",
         "* 4. Update product                         *\n",
-        "* 5. Exit program                           *\n",
+        "* 5. Delete product by ID                   *\n",
+        "* 6. Exit program                           *\n",
         "*********************************************\n");
         option = parseInt(prompt("Enter your option: "));
-        if (option < 1 || option > 5) {
+        if (option < 1 || option > 6) {
           //setTimeout(() => {console.log("Please enter a valid option!")}, 1500);
         console.log("Please enter a valid option!");
         auxEnter = prompt("Press enter to continue:");
           console.clear();
         }
-    }while(!(option >= 1 && option <= 5));
+    }while(!(option >= 1 && option <= 6));
     console.clear();
     switch (option) {
       case 1:
@@ -188,6 +194,16 @@ const mainAsync = async () => {
         auxEnter = prompt("Press enter to continue:");
         break;
       case 5:
+        console.log("\n",
+          "*********************************************\n",
+          "---------MENU DELETING PRODUCTS BY ID--------\n",
+          "*********************************************\n");
+        auxid = parseInt(prompt("Enter the product ID: "));
+        console.log(manager.getProductById(auxid));
+        await manager.deleteProduct(auxid);
+        auxEnter = prompt("Press enter to continue:");
+        break;
+      case 6:
         console.log("See you later!");
         //setTimeout(() => {console.log("See you later!")}, 1000);
         auxEnter = prompt("Press enter to continue:");
